@@ -1,11 +1,11 @@
 
 #include <iostream>
 #include <vector>
-
-#include <OpenEXR/ImfRgbaFile.h>
-#include <OpenEXR/ImfStringAttribute.h>
-#include <OpenEXR/ImfMatrixAttribute.h>
-#include <OpenEXR/ImfArray.h>
+//
+//#include <OpenEXR/ImfRgbaFile.h>
+//#include <OpenEXR/ImfStringAttribute.h>
+//#include <OpenEXR/ImfMatrixAttribute.h>
+//#include <OpenEXR/ImfArray.h>
 
 #include <GL/glew.h>
 #define GLFW_DLL
@@ -42,14 +42,14 @@ Matrix4d lookat(const Vector3d& eye, const Vector3d& dir, const Vector3d& up) {
 		0, 0, 0, 1;
 	return m;
 }
-
-// OpenEXR writing
-void writeRgba(const char fileName [], const Imf::Rgba *pixels, int width, int height)
-{
-	Imf::RgbaOutputFile file(fileName, width, height, Imf::WRITE_RGBA);
-	file.setFrameBuffer(pixels, 1, width);
-	file.writePixels(height);
-}
+//
+//// OpenEXR writing
+//void writeRgba(const char fileName [], const Imf::Rgba *pixels, int width, int height)
+//{
+//	Imf::RgbaOutputFile file(fileName, width, height, Imf::WRITE_RGBA);
+//	file.setFrameBuffer(pixels, 1, width);
+//	file.writePixels(height);
+//}
 
 void updateCamera() {
 	float zNear = 0.01, zFar = 500;

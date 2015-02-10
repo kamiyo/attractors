@@ -1,9 +1,14 @@
 #pragma once
 
 #include <array>
+#include <queue>
 #include <vector>
+#include <Eigen/core>
 
-class Generator{
+typedef Eigen::VectorXd VectorXd;
+typedef Eigen::ArrayXd ArrayXd;
+
+class Generator {
 public:
 	const static int MAX_ITER = (int)5e5;
 	const static int MIN_ITER = (int)5e2;
@@ -11,45 +16,14 @@ public:
 	const static double EPSILON;
 	const static double MIN_COEFF, MAX_COEFF;
 
-	Generator(double init, int order = 0, double ratio = 0) 
-		: first_x(init)
-		, O(order)
-		, r(ratio)
-	{
-		reset();
-	}
+	virtual void reset() = 0;
+	virtual void search() = 0;
+	virtual int iterate() = 0;
+	virtual void lyapunov() = 0;
+	virtual void getCoeff() = 0;
+	virtual void plot(int prev) = 0;
 
-	void reset();
-
-	void search();
-	int iterate();
-	void lyapunov() {
-		double df = 0;
-		double x_pow_accum = 1;
-		for (int i = 1; i < coeff.size(); i++) {
-			df += i * coeff[i] * x_pow_accum;
-			x_pow_accum *= current_x;
-		}
-		df = abs(df);
-		if (df > 0) {
-			lsum += log(df);
-			NL += 1;
-		}
-		L = lsum / NL;
-		return;
-	}
-
-	void getCoeff();
-	void plot(int prev);
-
-	std::vector<double> x0, xn;
-	std::vector<double> coeff;
-	double first_x;
-	double current_x;
-	double r;
-	double lsum;
-	int O;
-	int N;
-	int NL;
-	double L;
 };
+
+bool operator< (const std::pair<double, double>& lh, const std::pair<double, double>& rh);
+std::ostream& operator<< (std::ostream& o, const std::vector<std::pair<double, double> >& p);
