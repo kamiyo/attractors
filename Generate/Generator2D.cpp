@@ -84,6 +84,8 @@ void Generator2D::getCoeff() {
 
 int Generator2D::iterate() {
 	while (1) {
+		temp_x = current_x;
+		temp_y = current_y;
 		pows.resize(n_coeff);
 		VectorXd powx, powy;
 		powx.resize(O + 1); powy.resize(O + 1);
@@ -105,7 +107,7 @@ int Generator2D::iterate() {
 
 		xy.push_back(Vector2d(current_x, current_y));
 		N++;
-		if (abs(current_x) > 1e6) {
+		if (abs(current_x) + abs(current_y) > 1e6) {
 			return 3;
 		}
 		if (N < Generator::MIN_ITER) {
@@ -115,7 +117,7 @@ int Generator2D::iterate() {
 			lyapunov();
 			return 1;
 		}
-		if (abs(current_x - tempx) < Generator::EPSILON) {
+		if (abs(current_x - temp_x) + abs(current_y - temp_y) < Generator::EPSILON) {
 			return 0;
 		}
 		lyapunov();

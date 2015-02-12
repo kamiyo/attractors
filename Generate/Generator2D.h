@@ -21,14 +21,18 @@ public:
 	void search();
 	int iterate();
 	void lyapunov() {
-		double df = (dx.cwiseProduct(xpow.tail(coeff.size() - 1))).dot(Eigen::Map<VectorXd>(coeff.data() + 1, coeff.size() - 1));
-		df = abs(df);
-		if (df > 0) {
-			lsum += log(df);
-			NL += 1;
+		double dx = current_x - temp_x;
+		double dy = current_x - temp_y;
+		double d2 = dx * dx + dy * dy;
+		if (d2 > 0) {
+			double df = 1e12 * d2;
+			double rs = 1 / sqrt(df);
+			if (df > 0) {
+				lsum += log(df);
+				NL++;
+			}
+			L = lsum / NL;
 		}
-		L = lsum / NL;
-		return;
 	}
 
 	void getCoeff();
@@ -37,9 +41,10 @@ public:
 	std::vector<Vector2d> xy;
 	std::queue<double> buff;
 	std::vector<double> coeffx, coeffy;
-	VectorXd pows, dx;
+	VectorXd pows;
 	double first_x, first_y;
 	double current_x, current_y;
+	double temp_x, temp_y;
 	double lsum;
 	int n_coeff;
 	int O;
