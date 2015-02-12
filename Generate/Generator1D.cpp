@@ -37,14 +37,14 @@ void Generator1D::search() {
 	std::cout << "]" << std::endl;
 	std::cout << "iter: " << N << std::endl;
 	std::cout << "lyapunov: " << L << std::endl;
-	std::cout << "n_points: " << xy.size() << std::endl;
+	std::cout << "n_points: " << xs.size() << std::endl;
 }
 
 void Generator1D::plot(int prev) {
 	prev = prev - 1;
 	std::ofstream out("attractor.txt");
-	for (int i = prev; i < xn.size(); i++) {
-		out << x0[i - prev] << " " << xn[i] << std::endl;
+	for (int i = prev; i < ys.size(); i++) {
+		out << xs[i - prev] << " " << ys[i] << std::endl;
 	}
 	out.flush();
 	out.close();
@@ -53,10 +53,10 @@ void Generator1D::plot(int prev) {
 void Generator1D::reset() {
 
 	current_x = first_x;
-	x0.clear();
-	x0.reserve(MAX_ITER);
-	xn.clear();
-	xn.reserve(MAX_ITER);
+	xs.clear();
+	xs.reserve(MAX_ITER);
+	ys.clear();
+	ys.reserve(MAX_ITER);
 	r = lsum = L = 0.;
 	N = NL = 0;
 	if (O < 2) {
@@ -80,16 +80,16 @@ void Generator1D::getCoeff() {
 
 int Generator1D::iterate() {
 	while (1) {
-		x0.push_back(current_x);
+		xs.push_back(current_x);
 		double tempx = current_x;
 		double x_pow_accum = 1;
-		xs.resize(coeff.size());
+		xpow.resize(coeff.size());
 		for (int i = 0; i < coeff.size(); i++) {
-			xs[i] = x_pow_accum;
+			xpow[i] = x_pow_accum;
 			x_pow_accum *= tempx;
 		}
-		current_x = xs.dot(Eigen::Map<VectorXd>(coeff.data(), coeff.size()));
-		xn.push_back(current_x);
+		current_x = xpow.dot(Eigen::Map<VectorXd>(coeff.data(), coeff.size()));
+		ys.push_back(current_x);
 		N++;
 		if (abs(current_x) > 1e6) {
 			return 3;

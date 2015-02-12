@@ -19,7 +19,7 @@ public:
 	void search();
 	int iterate();
 	void lyapunov() {
-		double df = (dx.cwiseProduct(xs.tail(coeff.size() - 1))).dot(Eigen::Map<VectorXd>(coeff.data() + 1, coeff.size() - 1));
+		double df = (dx.cwiseProduct(xpow.tail(coeff.size() - 1))).dot(Eigen::Map<VectorXd>(coeff.data() + 1, coeff.size() - 1));
 		df = abs(df);
 		if (df > 0) {
 			lsum += log(df);
@@ -32,10 +32,10 @@ public:
 	void getCoeff();
 	void plot(int prev);
 
-	std::vector<std::pair<double, double> > xy;
+	std::vector<double> xs, ys;
 	std::queue<double> buff;
 	std::vector<double> coeff;
-	VectorXd xs, dx;
+	VectorXd xpow, dx;
 	double first_x;
 	double current_x;
 	double r;
