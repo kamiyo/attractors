@@ -44,7 +44,7 @@ int main(int argc, char** argv) {
 		g = new Generator1D(0, 0);
 	}
 	g->search();
-	g->plot(prev);
+	g->storePoints();
 
 	STARTUPINFO si;
 	PROCESS_INFORMATION pi;

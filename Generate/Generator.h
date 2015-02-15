@@ -22,7 +22,8 @@ public:
 	virtual int iterate() = 0;
 	virtual void lyapunov() = 0;
 	virtual void getCoeff() = 0;
-	virtual void plot(int prev) = 0;
+	//virtual void plot(int prev) = 0;
+	virtual void storePoints() = 0;
 
 };
 

@@ -45,7 +45,9 @@ public:
 	}
 
 	void getCoeff();
-	void plot(int prev);
+
+	void storeCoeff();
+	void storePoints();
 
 	std::vector<Vector2d> xy;
 	std::vector<double> coeffx, coeffy;

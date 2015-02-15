@@ -40,11 +40,10 @@ void Generator1D::search() {
 	std::cout << "n_points: " << xs.size() << std::endl;
 }
 
-void Generator1D::plot(int prev) {
-	prev = prev - 1;
+void Generator1D::storePoints() {
 	std::ofstream out("attractor.txt");
-	for (int i = prev; i < ys.size(); i++) {
-		out << xs[i - prev] << " " << ys[i] << std::endl;
+	for (int i = 0; i < ys.size(); i++) {
+		out << xs[i] << " " << ys[i] << std::endl;
 	}
 	out.flush();
 	out.close();

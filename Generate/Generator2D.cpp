@@ -44,14 +44,26 @@ void Generator2D::search() {
 	std::cout << "n_points: " << xy.size() << std::endl;
 }
 
-void Generator2D::plot(int prev) {
-	prev = prev - 1;
-	std::ofstream out("attractor.txt");
-	for (Vector2d v : xy) {
-		out << v << std::endl;
+void Generator2D::storeCoeff() {
+	/*try {
+		std::ofstream out("coeff.dat", std::ios::out | std::ios::binary);
+		for ()
+	}*/
+}
+
+void Generator2D::storePoints() {
+	try {
+		std::ofstream out("attractor.dat", std::ios::out | std::ios::binary);
+		for (Vector2d v : xy) {
+			out.write((char*) &v, sizeof(Vector2d));
+		}
+		out.flush();
+		out.close();
 	}
-	out.flush();
-	out.close();
+	catch (std::exception e) {
+		std::cerr << e.what() << std::endl;
+	}
+	
 }
 
 void Generator2D::reset() {

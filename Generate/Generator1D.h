@@ -30,7 +30,8 @@ public:
 	}
 
 	void getCoeff();
-	void plot(int prev);
+	void storeCoeff();
+	void storePoints();
 
 	std::vector<double> xs, ys;
 	std::queue<double> buff;
