@@ -42,6 +42,13 @@ Matrix4d lookat(const Vector3d& eye, const Vector3d& dir, const Vector3d& up) {
 		0, 0, 0, 1;
 	return m;
 }
+
+Matrix4d orthographic(double left, double right, double top, double bottom, double near, double far) {
+	Matrix4d m = Matrix4d::Identity();
+	m.diagonal() << 2.0 / (right - left), 2.0 / (top - bottom), -2.0 / (far - near), 1.0;
+	m.col(3) << -1.0 * (right + left) / (right - left), -1.0 * (top + bottom) / (top - bottom), -1.0 * (far + near) / (far - near), 1.0;
+	return m;
+}
 //
 //// OpenEXR writing
 //void writeRgba(const char fileName [], const Imf::Rgba *pixels, int width, int height)
@@ -52,7 +59,7 @@ Matrix4d lookat(const Vector3d& eye, const Vector3d& dir, const Vector3d& up) {
 //}
 
 void updateCamera() {
-	float zNear = 0.01, zFar = 500;
+	float zNear = -1, zFar = 1;
 	//float d = (float) tracer.camera->_focalDistance;
 	//float imageRight = (float) tracer.camera->_width / (2. * d);
 	//float imageTop = (float) tracer.camera->_height / (2. * d);
@@ -125,8 +132,6 @@ int main(int argc, char** argv) {
 		}
 	}
 	std::cout << vertices.size() << std::endl;
-
-	//writeRgba("out.exr", &output[0][0], 800, 600);
 
 	int width = 800, height = 600;
 

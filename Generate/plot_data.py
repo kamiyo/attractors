@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 mpl.rcParams['path.simplify'] = True
 
-data = np.genfromtxt('attractor.txt', dtype=[('x0', np.float64), ('xn', np.float64)], skip_header=5)
+data = np.genfromtxt('attractor.txt', dtype=[('x', np.float64), ('y', np.float64)], skip_header=5)
 data = np.sort(data)
 x0, xn = zip(*data)
 

@@ -6,45 +6,49 @@
 #include <random>
 #include <iostream>
 
-const double Generator::EPSILON = 1e-9;
-const double Generator::MIN_COEFF = -10, Generator::MAX_COEFF = 10;
-
 void Generator2D::search() {
 	std::cout << "order: " << O << std::endl;
 	while (1) {
 		reset();
 		getCoeff();
 		int result = iterate();
-		if (result == 0) {
+		/*if (result == 0) {
 			std::cout << "fixed point" << std::endl;
 		}
-		else if (result == 1) {
+		else*/
+		if (result == 1) {
 			std::cout << "strange attractor" << std::endl;
 			break;
 		}
+		/*
 		else if (result == 2) {
 			std::cout << "limit cycle" << std::endl;
 		}
 		else if (result == 3) {
 			continue;
 			// unbounded
-		}
+		}*/
 	}
-	std::cout << "coeff: [ ";
-	for (double d : coeff) {
+	std::cout << "x coeffs: [ ";
+	for (double d : coeffx) {
+		std::cout << d << " ";
+	}
+	std::cout << "]" << std::endl;
+	std::cout << "y coeffs: [ ";
+	for (double d : coeffy) {
 		std::cout << d << " ";
 	}
 	std::cout << "]" << std::endl;
 	std::cout << "iter: " << N << std::endl;
 	std::cout << "lyapunov: " << L << std::endl;
-	std::cout << "n_points: " << xs.size() << std::endl;
+	std::cout << "n_points: " << xy.size() << std::endl;
 }
 
 void Generator2D::plot(int prev) {
 	prev = prev - 1;
 	std::ofstream out("attractor.txt");
-	for (int i = prev; i < ys.size(); i++) {
-		out << xs[i - prev] << " " << ys[i] << std::endl;
+	for (Vector2d v : xy) {
+		out << v << std::endl;
 	}
 	out.flush();
 	out.close();
@@ -52,12 +56,9 @@ void Generator2D::plot(int prev) {
 
 void Generator2D::reset() {
 
-	current_x = first_x;
-	current_y = first_y;
-	xs.clear();
-	xs.reserve(MAX_ITER);
-	ys.clear();
-	ys.reserve(MAX_ITER);
+	save = e = last = current = initial;
+	xy.clear();
+	xy.reserve(MAX_ITER);
 	lsum = L = 0.;
 	N = NL = 0;
 	if (O < 2) {
@@ -70,7 +71,7 @@ void Generator2D::reset() {
 	coeffx.clear(); coeffy.clear();
 	coeffx.resize(n_coeff);
 	coeffy.resize(n_coeff);
-	//!!!! dx.setLinSpaced(O, 1, O);
+	pows.resize(n_coeff);
 }
 
 void Generator2D::getCoeff() {
@@ -82,32 +83,33 @@ void Generator2D::getCoeff() {
 	std::generate(coeffy.begin(), coeffy.end(), rand);
 }
 
+Vector2d Generator2D::step() {
+	VectorXd powx, powy;
+	powx.resize(O + 1); powy.resize(O + 1);
+	powx[0] = current.x();
+	powy[0] = current.y();
+	for (int i = 1; i < O + 1; i++) {
+		powx[i] = powx[i - 1] * current.x();
+		powy[i] = powy[i - 1] * current.y();
+	}
+	int cur = 0;
+	for (int i = 0; i < O + 1; i++) {
+		for (int j = 0; (i + j) < O + 1; j++) {
+			pows[cur++] = powx[j] * powy[i];
+		}
+	}
+
+	return Vector2d(pows.dot(Eigen::Map<VectorXd>(coeffx.data(), coeffx.size()))
+		, pows.dot(Eigen::Map<VectorXd>(coeffy.data(), coeffy.size())));
+}
+
 int Generator2D::iterate() {
 	while (1) {
-		temp_x = current_x;
-		temp_y = current_y;
-		pows.resize(n_coeff);
-		VectorXd powx, powy;
-		powx.resize(O + 1); powy.resize(O + 1);
-		powx[0] = current_x;
-		powy[0] = current_y;
-		for (int i = 1; i < O + 1; i++) {
-			powx[i] = powx[i - 1] * current_x;
-			powy[i] = powy[i - 1] * current_y;
-		}
-		int cur = 0;
-		for (int i = 0; i < O + 1; i++) {
-			for (int j = 0; (i + j) < O + 1; j++) {
-				pows[cur++] = powx[j] * powy[i];
-			}
-		}
-
-		current_x = pows.dot(Eigen::Map<VectorXd>(coeffx.data(), coeffx.size()));
-		current_y = pows.dot(Eigen::Map<VectorXd>(coeffy.data(), coeffy.size()));
-
-		xy.push_back(Vector2d(current_x, current_y));
+		last = current;
+		current = step();
+		xy.push_back(current);
 		N++;
-		if (abs(current_x) + abs(current_y) > 1e6) {
+		if (current.cwiseAbs().sum() > 1e6) {
 			return 3;
 		}
 		if (N < Generator::MIN_ITER) {
@@ -117,7 +119,7 @@ int Generator2D::iterate() {
 			lyapunov();
 			return 1;
 		}
-		if (abs(current_x - temp_x) + abs(current_y - temp_y) < Generator::EPSILON) {
+		if ((current - last).cwiseAbs().sum() < Generator::EPSILON) {
 			return 0;
 		}
 		lyapunov();

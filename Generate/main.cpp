@@ -3,43 +3,45 @@
 #include <Eigen/Geometry>
 #include <iostream>
 #include "Generator1D.h"
+#include "Generator2D.h"
 #include <tclap/CmdLine.h>
 #include <Windows.h>
 
 int main(int argc, char** argv) {
 
 	int dim, ord, prev;
-	std::vector<double> inits;
+	double x, y, z;
 
 	try {
 		TCLAP::CmdLine cmd("Generate Strange Attractors", ' ');
 		TCLAP::ValueArg<int> _dim("d", "dimension", "the dimension of the attractor", true, 1, "int", cmd);
 		TCLAP::ValueArg<int> _ord("o", "order", "the order of the attractor polynomial", false, 0, "int", cmd);
-		TCLAP::MultiArg<double> _inits("x", "initial", "the initial values of the iterator", true, "# of dimension doubles", cmd);
-		TCLAP::ValueArg<int> _prev("p", "previous", "nth previous iterate to plot", true, 1, "int", cmd);
+		TCLAP::ValueArg<double> _x("x", "initial_x", "the initial values of the iterator", true, 0.5, "initial x coord", cmd);
+		TCLAP::ValueArg<double> _y("y", "initial_y", "the initial values of the iterator", false, 0.5, "initial y coord", cmd);
+		TCLAP::ValueArg<double> _z("z", "initial_z", "the initial values of the iterator", false, 0.5, "initial z coord", cmd);
+		TCLAP::ValueArg<int> _prev("p", "previous", "nth previous iterate to plot", false, 1, "int", cmd);
 		cmd.parse(argc, argv);
 
 		dim = _dim.getValue();
 		ord = _ord.getValue();
 		prev = _prev.getValue();
-		inits = _inits.getValue();
+		x = _x.getValue();
+		y = _y.getValue();
+		z = _z.getValue();
 	}
 	catch (TCLAP::ArgException &e) {
 		std::cerr << "error: " << e.error() << " for arg " << e.argId() << std::endl;
 	}
 
-	std::cout << dim << " " << ord << " " << prev << std::endl;
-	for (double i : inits) {
-		std::cout << i << " ";
-	}
-	std::cout << std::endl;
-
 	Generator* g;
 	if (dim == 1) {
-		g = new Generator1D(inits[0], ord);
+		g = new Generator1D(x, ord);
+	}
+	else if (dim == 2) {
+		g = new Generator2D(x, y, ord);
 	}
 	else {
-		g = new Generator1D(atof(argv[2]), atoi(argv[3]));
+		g = new Generator1D(0, 0);
 	}
 	g->search();
 	g->plot(prev);

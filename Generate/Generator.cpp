@@ -1,5 +1,6 @@
 #include "Generator.h"
 
+
 const double EPSILON = 1e-6;
 const double MIN_COEFF = -5.0, MAX_COEFF = 5.0;
 
@@ -12,4 +13,8 @@ std::ostream& operator<< (std::ostream& o, const std::vector<std::pair<double, d
 		o << i.first << " " << i.second << std::endl;
 	}
 	return o;
+}
+
+std::ostream& operator<< (std::ostream& o, const Vector2d& v) {
+	return o << v.x() << " " << v.y();
 }

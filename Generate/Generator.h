@@ -5,14 +5,15 @@
 #include <vector>
 #include <Eigen/core>
 
+typedef Eigen::Vector2d Vector2d;
 typedef Eigen::VectorXd VectorXd;
 typedef Eigen::ArrayXd ArrayXd;
 
 class Generator {
 public:
-	const static int MAX_ITER = (int)5e5;
+	const static int MAX_ITER = (int)1e6;
 	const static int MIN_ITER = (int)5e2;
-	const static int MAX_ORDER = 10;	// O+1 coeff
+	const static int MAX_ORDER = 5;	// O+1 coeff
 	const static double EPSILON;
 	const static double MIN_COEFF, MAX_COEFF;
 
@@ -27,3 +28,4 @@ public:
 
 bool operator< (const std::pair<double, double>& lh, const std::pair<double, double>& rh);
 std::ostream& operator<< (std::ostream& o, const std::vector<std::pair<double, double> >& p);
+std::ostream& operator<< (std::ostream& o, const Vector2d& v);
