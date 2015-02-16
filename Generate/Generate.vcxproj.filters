@@ -43,10 +43,7 @@
     <None Include="plot_data.py">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="pyqt_plot.py">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="vispy_plot.py">
+    <None Include="plot_vpython.py">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

@@ -13,7 +13,7 @@ void Generator1D::search() {
 	std::cout << "order: " << O << std::endl;
 	while (1) {
 		reset();
-		getCoeff();
+		genCoeff();
 		int result = iterate();
 		if (result == 0) {
 			std::cout << "fixed point" << std::endl;
@@ -64,12 +64,13 @@ void Generator1D::reset() {
 		std::uniform_int_distribution<int> dis(2, MAX_ORDER + 1);
 		O = dis(gen);
 	}
+	n_coeff = O + 1;
 	coeff.clear();
-	coeff.resize(O + 1);
+	coeff.resize(n_coeff);
 	dx.setLinSpaced(O, 1, O);
 }
 
-void Generator1D::getCoeff() {
+void Generator1D::genCoeff() {
 	std::random_device rd;
 	std::mt19937_64 gen(rd());
 	std::uniform_real_distribution<double> dis(MIN_COEFF, MAX_COEFF);
@@ -77,18 +78,23 @@ void Generator1D::getCoeff() {
 	std::generate(coeff.begin(), coeff.end(), rand);
 }
 
+Vector2d Generator1D::step() {
+	xs.push_back(current_x);
+	prev_x = current_x;
+	double x_pow_accum = 1;
+	xpow.resize(n_coeff);
+	for (int i = 0; i < n_coeff; i++) {
+		xpow[i] = x_pow_accum;
+		x_pow_accum *= prev_x;
+	}
+	return Vector2d(current_x, xpow.dot(Eigen::Map<VectorXd>(coeff.data(), coeff.size())));
+}
+
 int Generator1D::iterate() {
 	while (1) {
-		xs.push_back(current_x);
-		double tempx = current_x;
-		double x_pow_accum = 1;
-		xpow.resize(coeff.size());
-		for (int i = 0; i < coeff.size(); i++) {
-			xpow[i] = x_pow_accum;
-			x_pow_accum *= tempx;
-		}
-		current_x = xpow.dot(Eigen::Map<VectorXd>(coeff.data(), coeff.size()));
-		ys.push_back(current_x);
+		Vector2d result = step();
+		xs.push_back(result.x());
+		ys.push_back(result.y());
 		N++;
 		if (abs(current_x) > 1e6) {
 			return 3;
@@ -100,7 +106,7 @@ int Generator1D::iterate() {
 			lyapunov();
 			return 1;
 		}
-		if (abs(current_x - tempx) < Generator::EPSILON) {
+		if (abs(current_x - prev_x) < Generator::EPSILON) {
 			return 0;
 		}
 		lyapunov();

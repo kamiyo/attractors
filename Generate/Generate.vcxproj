@@ -131,8 +131,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="plot_data.py" />
-    <None Include="pyqt_plot.py" />
-    <None Include="vispy_plot.py" />
+    <None Include="plot_vpython.py" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

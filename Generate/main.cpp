@@ -1,7 +1,6 @@
 #include <Eigen/Core>
 #include <Eigen/StdVector>
 #include <Eigen/Geometry>
-#include <iostream>
 #include "Generator1D.h"
 #include "Generator2D.h"
 #include <tclap/CmdLine.h>
@@ -11,7 +10,7 @@ int main(int argc, char** argv) {
 
 	int dim, ord, prev;
 	double x, y, z;
-
+	std::string inFile;
 	try {
 		TCLAP::CmdLine cmd("Generate Strange Attractors", ' ');
 		TCLAP::ValueArg<int> _dim("d", "dimension", "the dimension of the attractor", true, 1, "int", cmd);
@@ -20,6 +19,7 @@ int main(int argc, char** argv) {
 		TCLAP::ValueArg<double> _y("y", "initial_y", "the initial values of the iterator", false, 0.5, "initial y coord", cmd);
 		TCLAP::ValueArg<double> _z("z", "initial_z", "the initial values of the iterator", false, 0.5, "initial z coord", cmd);
 		TCLAP::ValueArg<int> _prev("p", "previous", "nth previous iterate to plot", false, 1, "int", cmd);
+		TCLAP::ValueArg<std::string> _inFile("f", "coeff_file", "binary file of 1 byte header (4 bits order, 4 bits dim) + doubles", false, "", "file name", cmd);
 		cmd.parse(argc, argv);
 
 		dim = _dim.getValue();
@@ -28,9 +28,14 @@ int main(int argc, char** argv) {
 		x = _x.getValue();
 		y = _y.getValue();
 		z = _z.getValue();
+		inFile = _inFile.getValue();
 	}
 	catch (TCLAP::ArgException &e) {
 		std::cerr << "error: " << e.error() << " for arg " << e.argId() << std::endl;
+	}
+
+	if (inFile != "") {
+
 	}
 
 	Generator* g;
@@ -39,6 +44,9 @@ int main(int argc, char** argv) {
 	}
 	else if (dim == 2) {
 		g = new Generator2D(x, y, ord);
+	}
+	else if (dim == 3) {
+		g = new Generator2D(x, y, z, ord);
 	}
 	else {
 		g = new Generator1D(0, 0);
@@ -69,6 +77,15 @@ int main(int argc, char** argv) {
 	WaitForSingleObject(pi.hProcess, INFINITE);
 	CloseHandle(pi.hProcess);
 	CloseHandle(pi.hThread);
+
+	std::cout << "Save coefficients? [Yy/Nn] ";
+	char save;
+	std::cin >> save;
+	if (save == 'y' || save == 'Y') {
+		g->storeCoeff();
+	}
+
+	delete g;
 
 	return 0;
 }

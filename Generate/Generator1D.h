@@ -8,9 +8,10 @@ public:
 
 	Generator1D(double init, int order = 0, double ratio = 0)
 		: first_x(init)
-		, O(order)
 		, r(ratio)
 	{
+		O = order;
+		D = 1;
 		reset();
 	}
 
@@ -18,6 +19,7 @@ public:
 
 	void search();
 	int iterate();
+	Vector2d step();
 	void lyapunov() {
 		double df = (dx.cwiseProduct(xpow.tail(coeff.size() - 1))).dot(Eigen::Map<VectorXd>(coeff.data() + 1, coeff.size() - 1));
 		df = abs(df);
@@ -29,7 +31,13 @@ public:
 		return;
 	}
 
-	void getCoeff();
+	void genCoeff();
+	void getCoeff(std::ofstream& o) {
+		for (double v : coeff) {
+			o.write((char*) &v, sizeof(double));
+		}
+	}
+
 	void storeCoeff();
 	void storePoints();
 
@@ -38,10 +46,10 @@ public:
 	std::vector<double> coeff;
 	VectorXd xpow, dx;
 	double first_x;
+	double prev_x;
 	double current_x;
 	double r;
 	double lsum;
-	int O;
 	int N;
 	int NL;
 	double L;
