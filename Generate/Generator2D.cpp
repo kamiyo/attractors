@@ -67,7 +67,7 @@ void Generator2D::storePoints() {
 
 void Generator2D::reset() {
 	save = e = last = current = initial;
-	points.resize(D, MAX_ITER);
+	points.resize(MAX_ITER, D);
 	lsum = L = 0.;
 	N = NL = 0;
 	if (O < 2) {
@@ -128,7 +128,7 @@ int Generator2D::iterate() {
 	while (1) {
 		last = current;
 		current = step();
-		//xy.push_back(current);
+		points.row(N) = current;
 		N++;
 		if (current.cwiseAbs().sum() > 1e6) {
 			return 3;

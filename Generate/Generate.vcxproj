@@ -120,14 +120,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Generator.cpp" />
-    <ClCompile Include="Generator2D.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Generator1D.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Generator.h" />
-    <ClInclude Include="Generator1D.h" />
-    <ClInclude Include="Generator2D.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="plot_data.py" />

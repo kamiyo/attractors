@@ -26,7 +26,7 @@ public:
 
 	void search();
 	int iterate();
-	Vector2d step();
+	VectorXd step();
 
 	VectorXi incrementPermutation(VectorXi in, int max, int size, int& sum) {
 		in[0]++;
@@ -53,8 +53,8 @@ public:
 	void lyapunov() {
 		save = current;
 		current = e;
-		Vector2d next = step();
-		Vector2d dx = next - save;
+		VectorXd next = step();
+		VectorXd dx = next - save;
 		double d2 = dx.squaredNorm();
 
 		if (d2 > 0) {

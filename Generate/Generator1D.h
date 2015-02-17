@@ -20,16 +20,7 @@ public:
 	void search();
 	int iterate();
 	Vector2d step();
-	void lyapunov() {
-		double df = (dx.cwiseProduct(xpow.tail(coeff.size() - 1))).dot(Eigen::Map<VectorXd>(coeff.data() + 1, coeff.size() - 1));
-		df = abs(df);
-		if (df > 0) {
-			lsum += log(df);
-			NL += 1;
-		}
-		L = lsum / NL;
-		return;
-	}
+	
 
 	void genCoeff();
 	void getCoeff(std::ofstream& o) {
