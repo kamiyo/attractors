@@ -147,7 +147,7 @@ int main(int argc, char** argv) {
 		return 1;
 	}
 	glfwMakeContextCurrent(glWindow);
-	glfwSetWindowSizeCallback(glWindow, bufferSize_cb);
+	glfwSetFramebufferSizeCallback(glWindow, bufferSize_cb);
 	glfwSetKeyCallback(glWindow, key_cb);
 
 	glewExperimental = GL_TRUE;

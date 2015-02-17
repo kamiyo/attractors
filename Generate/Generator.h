@@ -1,26 +1,23 @@
 #pragma once
 
-#include <cassert>
+#include <algorithm>
 #include <array>
+#include <cassert>
 #include <fstream>
+#include <functional>
 #include <iostream>
 #include <numeric>
+#include <random>
 #include <queue>
 #include <vector>
-#include <Eigen/core>
 
-typedef Eigen::Matrix<double, 1, 1> Vector1d;
-typedef Eigen::Vector2d Vector2d;
-typedef Eigen::Vector3d Vector3d;
-typedef Eigen::Vector4d Vector4d;
-typedef Eigen::VectorXd VectorXd;
-typedef Eigen::VectorXi VectorXi;
-typedef Eigen::ArrayXd ArrayXd;
-typedef Eigen::MatrixXd MatrixXd;
-typedef Eigen::MatrixXi MatrixXi;
+#include "typedefs.h"
 
 namespace {
-	int INF = std::numeric_limits<int>::infinity();
+	int iINF = std::numeric_limits<int>::infinity();
+	double dINF = std::numeric_limits<double>::infinity();
+	int niINF = -1 * iINF;
+	double ndINF = -1.0 * dINF;
 }
 
 class Generator {
@@ -97,6 +94,34 @@ public:
 		std::cout << "lyapunov: " << L << std::endl;
 	}
 
+	void initialize() {
+		points.resize(D, MAX_ITER);
+		min.resize(D);
+		min.setConstant(dINF);
+		max.resize(D);
+		max.setConstant(ndINF);
+		if (O < 2) {
+			std::random_device rd;
+			std::mt19937_64 gen(rd());
+			std::uniform_int_distribution<int> dis(2, MAX_ORDER + 1);
+			O = dis(gen);
+		}
+		n_coeff = 1;
+		double denom = 1;
+		for (int i = 1; i <= D; i++) {
+			n_coeff *= O + i;
+			if (i > 1) {
+				denom *= i - 1;
+			}
+		}
+		n_coeff /= (int) denom * D;
+		coeff.resize(n_coeff, D);
+		powList.resize(O + 1, D);
+		powPerm.resize(n_coeff);
+		permutation = createPermutation();
+		std::cout << permutation << std::endl;
+	}
+
 	void reset();
 
 	void search();
@@ -157,9 +182,9 @@ public:
 
 	void genCoeff();
 
-	void storeCoeff() {
+	void storeCoeff(const std::string& name) {
 		try {
-			std::ofstream out("coeff.dat", std::ios::out | std::ios::binary);
+			std::ofstream out(name, std::ios::out | std::ios::binary);
 			unsigned char dim = D - 1; // 0 - 3 (uses 2 bits) rep. 1D - 4D
 			unsigned char order = O << 4;
 			unsigned char head = dim | order;
@@ -207,6 +232,7 @@ public:
 	VectorXd current;
 	VectorXd last;
 	VectorXd e, save;
+	VectorXd min, max;
 	double lsum;
 	int N;
 	int NL;

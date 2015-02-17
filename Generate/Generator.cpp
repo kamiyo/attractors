@@ -1,13 +1,8 @@
 #include "Generator.h"
-#include <algorithm>
-#include <functional>
-#include <random>
 #include <iostream>
 
-
-
 const double Generator::EPSILON = 1e-6;
-const double Generator::MIN_COEFF = -5.0, Generator::MAX_COEFF = 5.0;
+const double Generator::MIN_COEFF = -2.0, Generator::MAX_COEFF = 2.0;
 int Generator::MAX_ITER = (int)1e6;
 int Generator::MIN_ITER = (int)5e2;
 int Generator::MAX_ORDER = 5;	// O+1 coeff
@@ -29,26 +24,32 @@ std::ostream& operator<< (std::ostream& o, const Vector2d& v) {
 
 void Generator::search() {
 	std::cout << "order: " << O << std::endl;
+	std::cout << "initial: " << std::endl;
+	std::cout << initial << std::endl;
+	int fix = 0, limit = 0, unb = 0;
+	initialize();
 	while (1) {
 		reset();
 		genCoeff();
 		int result = iterate();
-		/*if (result == 0) {
-		std::cout << "fixed point" << std::endl;
+		if (result == 0) {
+			fix++;
+		//std::cout << "fixed point" << std::endl;
 		}
-		else*/
-		if (result == 1) {
-			std::cout << "strange attractor" << std::endl;
+		else if (result == 1) {
+			std::cout << std::endl << "strange attractor" << std::endl;
 			break;
 		}
-		/*
 		else if (result == 2) {
-		std::cout << "limit cycle" << std::endl;
+		//std::cout << "limit cycle" << std::endl;
+			limit++;
 		}
 		else if (result == 3) {
-		continue;
+			unb++;
 		// unbounded
-		}*/
+		}
+		if ((fix + limit + unb) % (int)1e6 == 0)
+		std::cout << "\rfixed: " << fix << " limit: " << limit << " unbounded: " << unb;
 	}
 	std::cout << "coeffs:" << std::endl;
 	std::cout << coeff << std::endl;
@@ -72,28 +73,8 @@ void Generator::storePoints() {
 void Generator::reset() {
 	save = e = last = current = initial;
 	e[0] += 1e-6;
-	points.resize(D, MAX_ITER);
 	lsum = L = 0.;
 	N = NL = 0;
-	if (O < 2) {
-		std::random_device rd;
-		std::mt19937_64 gen(rd());
-		std::uniform_int_distribution<int> dis(2, MAX_ORDER + 1);
-		O = dis(gen);
-	}
-	n_coeff = 1;
-	double denom = 1;
-	for (int i = 1; i <= D; i++) {
-		n_coeff *= O + i;
-		if (i > 1) {
-			denom *= i - 1;
-		}
-	}
-	n_coeff /= denom * D;
-	coeff.resize(n_coeff, D);
-	powList.resize(O + 1, D);
-	powPerm.resize(n_coeff);
-	permutation = createPermutation();
 }
 
 void Generator::genCoeff() {
@@ -127,6 +108,8 @@ int Generator::iterate() {
 		last = current;
 		current = step();
 		points.col(N) = current;
+		min = min.cwiseMin(current);
+		max = max.cwiseMax(current);
 		N++;
 		if (current.cwiseAbs().sum() > 1e6) {
 			return 3;
