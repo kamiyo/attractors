@@ -9,7 +9,7 @@
 
 class Camera {
 public:
-	Matrix4d perspective(double right, double top, double near, double far) {
+	static Matrix4d perspective(double right, double top, double near, double far) {
 		Matrix4d m; m << near / right, 0, 0, 0,
 			0, near / top, 0, 0,
 			0, 0, -(far + near) / (far - near), -2 * far * near / (far - near),
@@ -17,7 +17,7 @@ public:
 		return m;
 	}
 
-	Matrix4d lookat(const Vector3d& eye, const Vector3d& dir, const Vector3d& up) {
+	static Matrix4d lookat(const Vector3d& eye, const Vector3d& dir, const Vector3d& up) {
 		Vector3d u = dir.normalized().cross(up.normalized()).normalized();
 		Vector3d v = u.cross(dir.normalized());
 		Vector3d w = -dir.normalized();
@@ -29,16 +29,13 @@ public:
 		return m;
 	}
 
-	Matrix4d orthographic(double left, double right, double top, double bottom, double near, double far) {
+	static Matrix4d orthographic(double left, double right, double top, double bottom, double near, double far) {
 		Matrix4d m = Matrix4d::Identity();
 		m.diagonal() << 2.0 / (right - left), 2.0 / (top - bottom), -2.0 / (far - near), 1.0;
 		m.col(3) << -1.0 * (right + left) / (right - left), -1.0 * (top + bottom) / (top - bottom), -1.0 * (far + near) / (far - near), 1.0;
 		return m;
 	}
-
-	void updateCamera(int width, int height) {
-	}
-
+	
 	Vector3d _eye, _dir, _up;
 	double _left, _right, _top, _bottom, _near, _far;
 };

@@ -75,6 +75,8 @@ void Generator::reset() {
 	e[0] += 1e-6;
 	lsum = L = 0.;
 	N = NL = 0;
+	max.setConstant(ndINF);
+	min.setConstant(dINF);
 }
 
 void Generator::genCoeff() {

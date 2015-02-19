@@ -16,18 +16,37 @@
 
 namespace {
 	GLFWwindow* glWindow;
-	Camera* camera;
+	Matrix4d camera;
+	Generator* g;
+	Vector3d mid;
 }
 
 void error_cb(int error, const char* description) {
 	std::cerr << "error " << error << ": " << description << std::endl;;
 }
 
+void updateCamera() {
+	if (g != nullptr) {
+		if (g->D == 2) {
+			camera = Camera::orthographic(g->min.x(), g->max.x(), g->max.y(), g->min.y(), 1, -1);
+		}
+		else if (g->D == 3) {
+			mid = (g->min + g->max) / 2;
+			std::cout << mid << std::endl;
+			double dist = (g->max - mid).norm() / tan(M_PI / 6.0);
+			std::cout << tan(M_PI / 6.0) << std::endl;
+			camera = Camera::perspective(0.1, 0.075, 0.1, 10);
+			camera *= Camera::lookat(mid - dist * mid.normalized(), mid, Vector3d(0, 1, 0));
+			std::cout << mid - dist * mid.normalized() << std::endl;
+		}
+	}
+}
+
 void bufferSize_cb(GLFWwindow* glWindow, int width, int height) {
 	glViewport(0, 0, width, height);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glLoadIdentity();
-	camera->updateCamera(width, height);
+	updateCamera();
 }
 
 static void key_cb(GLFWwindow* window, int key, int scancode, int action, int mods) {
@@ -59,16 +78,12 @@ int GLinit(int w, int h) {
 	std::cout << "renderer: " << renderer << std::endl;
 	std::cout << "OpenGL version: " << version << std::endl;
 
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LESS);
+	//glEnable(GL_DEPTH_TEST);
+	//glDepthFunc(GL_LESS);
+	glEnable(GL_MULTISAMPLE);
+	glClearColor(0, 0, 0, 0);
 	return 0;
 }
-
-int initBuffers(std::vector<GLuint> buffers, int n) {
-
-}
-
-
 
 int main(int argc, char** argv) {
 	int dim, ord, prev;
@@ -101,7 +116,6 @@ int main(int argc, char** argv) {
 		std::cerr << "error: " << e.error() << " for arg " << e.argId() << std::endl;
 	}
 
-	Generator* g;
 	if (inFile != "") {
 		if (iterString == "") {
 			g = new Generator(inFile);
@@ -143,6 +157,47 @@ int main(int argc, char** argv) {
 	g->storePoints();
 
 	GLinit(800, 600);
+	GLuint vao, vbo;
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
+
+	glGenBuffers(1, &vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	MatrixXd data(g->points);
+	if (g->D == 2) {
+		data.conservativeResize(3, Eigen::NoChange);
+		data.row(2).setZero();
+	}
+	
+	glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(double), data.data(), GL_STATIC_DRAW);
+
+	
+
+	GLuint shaderProgram = createProgram("vert.glsl", "frag.glsl");
+
+	GLuint vp_loc = glGetAttribLocation(shaderProgram, "vp");
+	GLuint camera_loc = glGetUniformLocation(shaderProgram, "camera");
+	glEnableVertexAttribArray(vp_loc);
+	glVertexAttribPointer(vp_loc, 3, GL_DOUBLE, GL_FALSE, 0, NULL);
+	glEnable(GL_BLEND);
+	//glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE);
+	glBlendFunc(GL_ONE, GL_ONE);
+	updateCamera();
+	
+	while (!glfwWindowShouldClose(glWindow)) {
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		glUseProgram(shaderProgram);
+		glUniformMatrix4dv(camera_loc, 1, GL_FALSE, camera.data());
+		glBindVertexArray(vao);
+		glDrawArrays(GL_POINTS, 0, data.cols());
+		glBindVertexArray(0);
+		
+		glUseProgram(0);
+
+		glfwSwapBuffers(glWindow);
+		glfwWaitEvents();
+	}
 
 	if (inFile == "") {
 		std::cout << "Save coefficients? [Yy/Nn] ";

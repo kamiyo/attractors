@@ -116,7 +116,8 @@
       <AdditionalDependencies>glfw3dll.lib;glew32.lib;opengl32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>Copy /Y "$(ProjectDir)*.py" "$(SolutionDir)$(Platform)\$(Configuration)\"</Command>
+      <Command>Copy /Y "$(ProjectDir)*.py" "$(SolutionDir)$(Platform)\$(Configuration)\"
+Copy /Y "$(ProjectDir)*.glsl" "$(SolutionDir)$(Platform)\$(Configuration)\"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -130,8 +131,10 @@
     <ClInclude Include="typedefs.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="frag.glsl" />
     <None Include="plot_data.py" />
     <None Include="plot_vpython.py" />
+    <None Include="vert.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

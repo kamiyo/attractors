@@ -82,24 +82,27 @@ public:
 	}
 
 	void generate() {
-		for (int i = 0; i < Generator::MAX_ITER; i++) {
-			current = step();
-			points.col(i) = current;
-		}
 		std::cout << "initial:" << std::endl;
 		std::cout << initial << std::endl;
 		std::cout << "coeffs:" << std::endl;
 		std::cout << coeff << std::endl;
+
+		for (int i = 0; i < Generator::MAX_ITER; i++) {
+			current = step();
+			points.col(i) = current;
+			min = min.cwiseMin(current);
+			max = max.cwiseMax(current);
+		}
+	
 		std::cout << "iter: " << Generator::MAX_ITER << std::endl;
 		std::cout << "lyapunov: " << L << std::endl;
 	}
 
 	void initialize() {
+		current = initial;
 		points.resize(D, MAX_ITER);
 		min.resize(D);
-		min.setConstant(dINF);
 		max.resize(D);
-		max.setConstant(ndINF);
 		if (O < 2) {
 			std::random_device rd;
 			std::mt19937_64 gen(rd());
@@ -119,7 +122,8 @@ public:
 		powList.resize(O + 1, D);
 		powPerm.resize(n_coeff);
 		permutation = createPermutation();
-		std::cout << permutation << std::endl;
+		max.setConstant(ndINF);
+		min.setConstant(dINF);
 	}
 
 	void reset();
@@ -211,7 +215,7 @@ public:
 			std::cout << D << " " << O << std::endl;
 			initial.resize(D);
 			in.read(reinterpret_cast<char*>(initial.data()), sizeof(double) * D);
-			reset();
+			initialize();
 			in.read(reinterpret_cast<char*>(coeff.data()), sizeof(double) * n_coeff * D);
 			in.read(reinterpret_cast<char*>(&L), sizeof(double));
 			in.close();

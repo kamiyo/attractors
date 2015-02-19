@@ -43,5 +43,11 @@
     <None Include="plot_vpython.py">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="frag.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="vert.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>
