@@ -22,6 +22,7 @@ namespace {
 	Matrix4d camera;
 	Generator* g;
 	Vector3d mid;
+	Vector3d mean;
 	double rad;
 	bool leftmousedown = false;
 	MatrixXd gui_points;
@@ -44,15 +45,16 @@ void updateCamera() {
 			camera = Camera::orthographic(g->min.x(), g->max.x(), g->max.y(), g->min.y(), 1, -1);
 		}
 		else if (g->D == 3) {
+			mean = g->points.rowwise().sum() / g->points.cols();
 			mid = (g->min + g->max) / 2;
-			std::cout << mid << std::endl;
 			rad = (g->max - mid).norm();
 			std::cout << "firstrad: " << std::endl;
 			double dist = rad / tan(M_PI / 6.0);
 			std::cout << tan(M_PI / 6.0) << std::endl;
 			camera = Camera::perspective(0.1, 0.075, 0.1, 10);
-			camera *= Camera::lookat(mid - dist * mid.normalized(), mid, Vector3d(0, 1, 0));
-			std::cout << mid - dist * mid.normalized() << std::endl;
+			camera *= Camera::lookat(mean - dist * mean.normalized(), mean, Vector3d(0, 1, 0));
+			//camera *= Camera::lookat(mid - dist * mid.normalized(), mid, Vector3d(0, 1, 0));
+			//std::cout << mid - dist * mid.normalized() << std::endl;
 		}
 	}
 }
@@ -129,7 +131,7 @@ int GLinit(int w, int h) {
 	updateCamera();
 
 	gui_points.resize(3, 6);
-	gui_points.colwise() = mid;
+	gui_points.colwise() = mean;
 	std::cout << "rad: " << rad << std::endl;
 	gui_points.col(1) += rad * Vector3d(1., 0., 0.);
 	gui_points.col(3) += rad * Vector3d(0., 1., 0.);
