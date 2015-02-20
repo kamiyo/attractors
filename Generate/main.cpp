@@ -22,6 +22,7 @@ namespace {
 	Matrix4d camera;
 	Generator* g;
 	Vector3d mid;
+	double rad;
 	bool leftmousedown = false;
 	MatrixXd gui_points;
 	MatrixXd gui_colors;
@@ -45,7 +46,9 @@ void updateCamera() {
 		else if (g->D == 3) {
 			mid = (g->min + g->max) / 2;
 			std::cout << mid << std::endl;
-			double dist = (g->max - mid).norm() / tan(M_PI / 6.0);
+			rad = (g->max - mid).norm();
+			std::cout << "firstrad: " << std::endl;
+			double dist = rad / tan(M_PI / 6.0);
 			std::cout << tan(M_PI / 6.0) << std::endl;
 			camera = Camera::perspective(0.1, 0.075, 0.1, 10);
 			camera *= Camera::lookat(mid - dist * mid.normalized(), mid, Vector3d(0, 1, 0));
@@ -123,11 +126,14 @@ int GLinit(int w, int h) {
 	camera_loc = glGetUniformLocation(shaderProgram, "camera");
 	color_loc = glGetAttribLocation(shaderProgram, "color");
 
+	updateCamera();
+
 	gui_points.resize(3, 6);
 	gui_points.colwise() = mid;
-	gui_points.col(1) += Vector3d(1., 0., 0.);
-	gui_points.col(3) += Vector3d(0., 1., 0.);
-	gui_points.col(5) += Vector3d(0., 0., 1.);
+	std::cout << "rad: " << rad << std::endl;
+	gui_points.col(1) += rad * Vector3d(1., 0., 0.);
+	gui_points.col(3) += rad * Vector3d(0., 1., 0.);
+	gui_points.col(5) += rad * Vector3d(0., 0., 1.);
 
 	gui_colors.resize(3, 6);
 	gui_colors.col(0) << 1., 0., 0.;
